@@ -1,0 +1,7 @@
+{
+  "name": "first-ion-refresh",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

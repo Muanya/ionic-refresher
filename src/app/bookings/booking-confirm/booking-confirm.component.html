@@ -1,0 +1,19 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="primary">
+      <ion-icon name="close" (click)="onClose()"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+
+<ion-content>
+  <ion-card class="ion-text-center">
+    <ion-card-subtitle> {{ data.title }}</ion-card-subtitle>
+    <ion-card-title> {{data.price | currency }} </ion-card-title>
+
+    <div class="ion-text-center ion-padding">
+      <ion-button (click)="onBook()"> BOOK NOW </ion-button>
+    </div>
+  </ion-card>
+</ion-content>

@@ -1,0 +1,58 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>expenses</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Expense Records</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-grid class="ion-padding">
+    <ion-row>
+      <ion-col [sizeMd]="6" [offsetMd]="3">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Expenses</ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content>
+            <ion-item>
+              <ion-label position="floating">Expense Reason</ion-label>
+              <ion-input type="text" [(ngModel)]="reason"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-label position="floating">Expense Amount</ion-label>
+              <ion-input type="number" [(ngModel)]="expense"></ion-input>
+            </ion-item>
+
+            <div class="ion-margin-vertical ion-text-right">
+              <ion-button fill="outline" color="danger" (click)="clear()"><ion-icon name="close"
+                  slot="start"></ion-icon>Clear</ion-button>
+              <ion-button (click)="addExpense()"><ion-icon name="add" slot="start"></ion-icon>Add Expense</ion-button>
+            </div>
+
+
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col [sizeMd]="6" [offsetMd]="3"><p class="ion-margin"><b>ALL EXPENSE RECORDS: </b></p></ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col [sizeMd]="6" [offsetMd]="3">
+        <ion-list id="expenses-list"></ion-list>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col [sizeMd]="6" [offsetMd]="3"> <p class="ion-margin"><b><i>Total Expenses</i></b>: {{total}} </p></ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
