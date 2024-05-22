@@ -41,5 +41,9 @@ export class PlacesService {
   public placesById(id: string): Places {
     return {...this._places.find(el => el.id === id)} as Places
   }
+
+  public deleteById(pId: string){
+    this._places = this._places.filter(p => p.id !== pId )
+  }
   
 }

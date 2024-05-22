@@ -7,7 +7,7 @@
 <ion-content>
 
   <div class="ion-margin ion-text-center">
-    <ion-button color="primary" (click)="userLogin()">
+    <ion-button color="primary" (click)="userLogin()" *ngIf="!isLoggingIn">
       Login
     </ion-button>
   </div>

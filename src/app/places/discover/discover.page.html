@@ -5,11 +5,24 @@
       <ion-menu-button></ion-menu-button>
 
     </ion-buttons>
-    <ion-title> Discover Places </ion-title>
+
+    <ion-segment value="all" (ionChange)="segmentChanged($event)">
+
+      <ion-segment-button value="all">
+        <ion-label>All Places</ion-label>
+      </ion-segment-button>
+
+      <ion-segment-button value="bookable">
+        <ion-label>Bookable Places </ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
+
+
   <ion-grid>
     <ion-row *ngFor="let place of places">
       <ion-col size="12" sizeSm="8" offsetSm="2" class="ion-text-center">

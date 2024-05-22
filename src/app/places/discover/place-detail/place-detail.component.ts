@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Places } from '../../places.model';
 import { ActivatedRoute } from '@angular/router';
 import { PlacesService } from '../../places.service';
-import { ModalController } from '@ionic/angular';
+import { ActionSheetController, ModalController } from '@ionic/angular';
 import { BookingConfirmComponent } from '../../../bookings/booking-confirm/booking-confirm.component';
 
 @Component({
@@ -16,7 +16,8 @@ export class PlaceDetailComponent implements OnInit {
   constructor(
     private activatedRoute: ActivatedRoute,
     private placeServices: PlacesService,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private actionSheetCtrl: ActionSheetController
   ) {}
 
   ngOnInit() {
@@ -30,15 +31,45 @@ export class PlaceDetailComponent implements OnInit {
   onButtonClicked() {
     // this.navCtrl.pop();
     // this.navCtrl.navigateBack("/places/discover")
-    this.modalCtrl.create({
-      component: BookingConfirmComponent,
-      componentProps: {data: this.selectedPlace}
-    }).then(el => {
-      el.present()
-      return el.onDidDismiss()   
-    }).then(returnEl => {
-      console.log(returnEl)
-    })
-  
+    this.actionSheetCtrl
+      .create({
+        buttons: [
+          {
+            text: 'Pick Date',
+            handler: () => this.showModal('pick'),
+          },
+          {
+            text: 'Random',
+            handler: () => this.showModal('random'),
+          },
+          {
+            text: 'Cancel',
+            role: 'cancel',
+            data: {
+              action: 'cancel',
+            },
+          },
+        ],
+      })
+      .then((el) => {
+        el.present();
+      });
+  }
+
+  private showModal(action: 'pick' | 'random') {
+    console.log(action);
+
+    this.modalCtrl
+      .create({
+        component: BookingConfirmComponent,
+        componentProps: { data: this.selectedPlace },
+      })
+      .then((el) => {
+        el.present();
+        return el.onDidDismiss();
+      })
+      .then((returnEl) => {
+        console.log(returnEl);
+      });
   }
 }
