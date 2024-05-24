@@ -15,13 +15,7 @@
   <ion-list>
 
     <ion-item-sliding *ngFor="let offer of offers" #slider>
-      <ion-item detail>
-        <ion-thumbnail slot="start">
-          <img [src]="offer.imageUrl">
-        </ion-thumbnail>
-  
-        <ion-label>{{offer.title}}</ion-label>
-      </ion-item>
+     <app-offer-item [offer]="offer"></app-offer-item>
   
       <ion-item-options>
         <ion-item-option (click)="onClickItem(offer.id, slider)">

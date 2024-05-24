@@ -1,0 +1,21 @@
+h1 {
+    font-size: 24px;
+    border: 1px solid var(--ion-color-primary);
+    border-radius: 6px;
+    color: var(--ion-color-primary);
+    padding-left: 3px;
+}
+
+.offer-items-range {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+
+    .space-left {
+        padding-left: 4px;
+    }
+
+    .to-color {
+        color: var(--ion-color-primary);
+    }
+}
