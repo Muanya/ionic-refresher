@@ -1,17 +1,20 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { Places } from '../../places.model';
-import { ActivatedRoute } from '@angular/router';
-import { PlacesService } from '../../places.service';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { ActionSheetController, ModalController } from '@ionic/angular';
-import { BookingConfirmComponent } from '../../../bookings/booking-confirm/booking-confirm.component';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
+
+import { Places } from '../../places.model';
+import { PlacesService } from '../../places.service';
+import { CreateBookingComponent } from '../../../bookings/create-booking/create-booking.component';
 
 @Component({
   selector: 'app-place-detail',
   templateUrl: './place-detail.component.html',
   styleUrls: ['./place-detail.component.scss'],
 })
-export class PlaceDetailComponent implements OnInit {
+export class PlaceDetailComponent implements OnInit, OnDestroy {
   @Input() selectedPlace!: Places;
+  private placesSub!: Subscription;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -24,7 +27,9 @@ export class PlaceDetailComponent implements OnInit {
     this.activatedRoute.paramMap.subscribe((params) => {
       var id = params.get('placeId') as string;
 
-      this.selectedPlace = this.placeServices.placesById(id);
+      this.placesSub = this.placeServices
+        .placesById(id)
+        .subscribe((place) => (this.selectedPlace = place));
     });
   }
 
@@ -57,12 +62,10 @@ export class PlaceDetailComponent implements OnInit {
   }
 
   private showModal(action: 'pick' | 'random') {
-    console.log(action);
-
     this.modalCtrl
       .create({
-        component: BookingConfirmComponent,
-        componentProps: { data: this.selectedPlace },
+        component: CreateBookingComponent,
+        componentProps: { place: this.selectedPlace, action: action },
       })
       .then((el) => {
         el.present();
@@ -71,5 +74,11 @@ export class PlaceDetailComponent implements OnInit {
       .then((returnEl) => {
         console.log(returnEl);
       });
+  }
+
+  ngOnDestroy(): void {
+    if (this.placesSub) {
+      this.placesSub.unsubscribe();
+    }
   }
 }

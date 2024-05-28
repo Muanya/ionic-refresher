@@ -1,38 +1,65 @@
-import { Component, OnInit } from '@angular/core';
-import { SegmentChangeEventDetail } from '@ionic/angular';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  IonSegment,
+  SegmentChangeEventDetail,
+  SegmentValue,
+} from '@ionic/angular';
+import { Subscription } from 'rxjs';
 
 import { PlacesService } from '../places.service';
 import { Places } from '../places.model';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-discover',
   templateUrl: './discover.page.html',
   styleUrls: ['./discover.page.scss'],
 })
-export class DiscoverPage implements OnInit {
+export class DiscoverPage implements OnInit, OnDestroy {
+  public places: Places[] = [];
 
-  public places: Places[] = []
+  @ViewChild('discoverSegment', { static: true })
+  private segment!: IonSegment;
 
-  constructor(private placeService: PlacesService) { }
+  private allPlaces: Places[] = [];
+  private placesSub!: Subscription;
+
+  constructor(
+    private authService: AuthService,
+    private placeService: PlacesService
+  ) {}
 
   ngOnInit() {
-    // this.places = this.placeService.places
+    this.placesSub = this.placeService.places.subscribe((p) => {
+      this.allPlaces = p;
+      this.places = this.allPlaces;
+    });
+
+    this.segment.ionChange.subscribe(event=>{
+      this.updateSegment(event.detail.value!);
+
+      
+    })
   }
 
-  ionViewWillEnter(){
-    this.places = this.placeService.places
-
+  ionViewDidEnter() {
+    this.updateSegment(this.segment.value!);
   }
 
-  segmentChanged(event: CustomEvent<SegmentChangeEventDetail>) {
-    console.log(event.detail)
-
-    if(event.detail.value == "all"){
-      this.places = this.placeService.places
-
-    }else{
-      this.places = this.placeService.places.slice(1)
+  
+  ngOnDestroy(): void {
+    if (this.placesSub) {
+      this.placesSub.unsubscribe();
     }
-    }
+  }
 
+  updateSegment(segmentValue: SegmentValue) {
+    if (segmentValue == 'all') {
+      this.places = this.allPlaces;
+    } else {
+      this.places = this.allPlaces.filter((pl) => {
+        return pl.userId == this.authService.user;
+      });
+    }
+  }
 }

@@ -1,0 +1,84 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="primary">
+      <ion-icon name="close" (click)="onClose()"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+
+<ion-content>
+
+  <ion-card class="ion-text-center">
+    <ion-card-subtitle> {{ place.title }}</ion-card-subtitle>
+    <ion-card-title> {{place.price | currency }} </ion-card-title>
+  </ion-card>
+
+  <form #bookForm="ngForm" (ngSubmit)="onSubmit()">
+    <ion-grid>
+      <ion-row>
+        <ion-col sizeSm="6" offsetSm="3">
+          <ion-input type="text" label="First Name" labelPlacement="floating" ngModel name="firstName"
+            required></ion-input>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col sizeSm="6" offsetSm="3">
+          <ion-input type="text" label="Last Name" labelPlacement="floating" ngModel name="lastName"
+            required></ion-input>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col sizeSm="6" offsetSm="3">
+          <ion-select label="Number of Guests" labelPlacement="floating" [ngModel]="'2'"
+            name="guestNumber">
+            <ion-select-option value="1">1</ion-select-option>
+            <ion-select-option value="2">2</ion-select-option>
+            <ion-select-option value="3">3</ion-select-option>
+          </ion-select>
+        </ion-col>
+      </ion-row>
+
+
+
+      <ion-row>
+        <ion-col sizeSm="3" offsetSm="3">
+
+          <ion-input value="{{ fromDate | date: 'dd MMM yyyy' }}" label="From" labelPlacement="floating"
+            id="availableFrom" required></ion-input>
+          <ion-modal trigger="availableFrom">
+            <ng-template>
+              <ion-datetime presentation="date" showDefaultButtons="true" locale="en-US" [(ngModel)]="fromDate"
+                 [min]="place.availableFrom.toISOString()" [max]="place.availableTo.toISOString()"
+                name="dateFrom"></ion-datetime>
+            </ng-template>
+          </ion-modal>
+        </ion-col>
+
+        <ion-col sizeSm="3">
+
+          <ion-input value="{{ toDate | date: 'dd MMM yyyy' }}" label="To" labelPlacement="floating"
+            id="availableTo" required></ion-input>
+          <ion-modal trigger="availableTo">
+            <ng-template>
+              <ion-datetime presentation="date" showDefaultButtons="true" [(ngModel)]="toDate"
+                 [min]="fromDate" [max]="place.availableTo.toISOString()"
+                name="dateTo"></ion-datetime>
+            </ng-template>
+          </ion-modal>
+        </ion-col>
+      </ion-row>
+
+
+      <ion-row>
+        <ion-col offsetSm="3" sizeSm="6">
+          <ion-button type="submit" expand="block" fill="clear" [disabled]="!form.valid"> BOOK NOW </ion-button>
+        </ion-col>
+      </ion-row>
+
+    </ion-grid>
+
+  </form>
+</ion-content>

@@ -1,0 +1,12 @@
+ion-modal {
+  --width: fit-content;
+  --min-width: 250px;
+  --height: fit-content;
+  --border-radius: 6px;
+}
+
+
+ion-datetime.ios {
+    color: var(--ion-color-primary);
+}
+

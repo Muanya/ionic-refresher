@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ModalController } from '@ionic/angular';
-import { BookingConfirmComponent } from './booking-confirm/booking-confirm.component';
 
 @Component({
   selector: 'app-bookings',
