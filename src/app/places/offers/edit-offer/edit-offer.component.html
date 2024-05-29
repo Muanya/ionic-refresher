@@ -15,8 +15,13 @@
 
 <ion-content>
 
+  <div class="center" *ngIf="!editable">
+    <ion-spinner color="primary"></ion-spinner>
+  </div>
+
+
   <form [formGroup]="form">
-  <ion-grid>
+  <ion-grid *ngIf="editable">
     <ion-row>
       <ion-col sizeSm="6" offsetSm="3">
         <ion-input label="Title" labelPlacement="floating" fill="solid" type="text" autocomplete formControlName="title"></ion-input>

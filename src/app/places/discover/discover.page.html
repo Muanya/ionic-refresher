@@ -22,8 +22,27 @@
 
 <ion-content>
 
+  <ion-grid *ngIf="isLoadingPlaces" class="center">
+    <ion-row>
+      <ion-col size="12" sizeSm="8" offsetSm="2" class="ion-text-center">
+        <ion-spinner color="primary"></ion-spinner>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 
-  <ion-grid>
+
+  <ion-grid *ngIf="!isLoadingPlaces && places.length <= 0" class="center">
+    <ion-row>
+      <ion-col size="12" sizeSm="8" offsetSm="2" class="ion-text-center">
+        No place available!
+        <br />
+        Check back later.
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+
+  <ion-grid *ngIf=" !isLoadingPlaces && places.length > 0">
     <ion-row *ngFor="let place of places">
       <ion-col size="12" sizeSm="8" offsetSm="2" class="ion-text-center">
         <ion-card>

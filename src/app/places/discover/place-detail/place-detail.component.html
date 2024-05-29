@@ -31,10 +31,14 @@
           </ion-col>
         </ion-row>
 
-        <div class="ion-margin ion-text-center">
+        <div class="ion-margin ion-text-center" *ngIf="bookable">
           <ion-button color="primary" (click)="onButtonClicked()">
             BOOK
-          </ion-button>
+          </ion-button> 
+        </div>
+
+        <div class="ion-margin ion-text-center" *ngIf="!bookable">
+          <ion-text color="secondary"> You cannot book this place! </ion-text>
         </div>
       </ion-col>
     </ion-row>

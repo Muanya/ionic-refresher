@@ -1,6 +1,6 @@
 <ion-header [translucent]="true">
 
- 
+
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
@@ -11,10 +11,36 @@
 
 <ion-content>
 
-  <div class="ion-margin ion-text-center">
-    <ion-button color="primary" (click)="onBook()">
-      Book Place
-    </ion-button>
-  </div>
- 
+
+  <ion-card class="ion-text-center" *ngIf="bookings.length <= 0">
+    <ion-card-header>
+      <ion-card-title>No Booking(s) Found</ion-card-title>
+    </ion-card-header>
+  
+    <ion-card-content>
+      Book a place to add bookings
+    </ion-card-content>
+  </ion-card>
+
+
+
+
+  <ion-list *ngIf="bookings.length > 0">
+    <ion-item-sliding *ngFor="let booking of bookings">
+      <ion-item lines="inset" detail>
+        <ion-col>
+          <ion-label> {{booking.placeTitle }} </ion-label>
+          <ion-text color="tertiary"><sub>Guests: {{booking.guestNumber }}</sub></ion-text>
+        </ion-col>
+      </ion-item>
+
+      <ion-item-options side="end">
+        <ion-item-option color="danger" (click)="onDelete(booking.id)">
+          <ion-icon slot="icon-only" name="trash"></ion-icon>
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+
+  </ion-list>
+
 </ion-content>

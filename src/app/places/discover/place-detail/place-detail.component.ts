@@ -6,6 +6,8 @@ import { Subscription } from 'rxjs';
 import { Places } from '../../places.model';
 import { PlacesService } from '../../places.service';
 import { CreateBookingComponent } from '../../../bookings/create-booking/create-booking.component';
+import { AuthService } from '../../../auth/auth.service';
+import { BookingsService } from '../../../bookings/bookings.service';
 
 @Component({
   selector: 'app-place-detail',
@@ -14,10 +16,14 @@ import { CreateBookingComponent } from '../../../bookings/create-booking/create-
 })
 export class PlaceDetailComponent implements OnInit, OnDestroy {
   @Input() selectedPlace!: Places;
+  bookable: boolean = false;
+
   private placesSub!: Subscription;
 
   constructor(
     private activatedRoute: ActivatedRoute,
+    private authService: AuthService,
+    private bookingService: BookingsService,
     private placeServices: PlacesService,
     private modalCtrl: ModalController,
     private actionSheetCtrl: ActionSheetController
@@ -27,9 +33,10 @@ export class PlaceDetailComponent implements OnInit, OnDestroy {
     this.activatedRoute.paramMap.subscribe((params) => {
       var id = params.get('placeId') as string;
 
-      this.placesSub = this.placeServices
-        .placesById(id)
-        .subscribe((place) => (this.selectedPlace = place));
+      this.placesSub = this.placeServices.placesById(id).subscribe((place) => {
+        this.selectedPlace = place;
+        this.bookable = this.selectedPlace.userId !== this.authService.user
+      });
     });
   }
 
@@ -71,8 +78,17 @@ export class PlaceDetailComponent implements OnInit, OnDestroy {
         el.present();
         return el.onDidDismiss();
       })
-      .then((returnEl) => {
-        console.log(returnEl);
+      .then((returnData) => {
+        const data = returnData.data.bookData;
+        this.bookingService.addBooking(
+          this.authService.user,
+          data.firstName,
+          data.lastName,
+          this.selectedPlace.title,
+          data.guestNumber,
+          data.availableFrom,
+          data.availableTo
+        );
       });
   }
 

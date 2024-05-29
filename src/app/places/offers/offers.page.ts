@@ -12,11 +12,11 @@ import { Places } from '../places.model';
   styleUrls: ['./offers.page.scss'],
 })
 export class OffersPage implements OnInit, OnDestroy {
-  offers : Places[] = []
+  offers: Places[] = [];
+  isLoadingPlaces: boolean = false;
   private placesSub!: Subscription;
 
-
-  constructor(private placeService: PlacesService, private router: Router) { }
+  constructor(private placeService: PlacesService, private router: Router) {}
 
   ngOnInit() {
     this.placesSub = this.placeService.places.subscribe(
@@ -24,9 +24,16 @@ export class OffersPage implements OnInit, OnDestroy {
     );
   }
 
-  onClickItem(oId:string, slider: IonItemSliding){
-    slider.close()
-    this.router.navigate(['/', 'places', 'offers', 'edit', oId])
+  ionViewWillEnter() {
+    this.isLoadingPlaces = true;
+    this.placeService.fetchPlaces().subscribe(() => {
+      this.isLoadingPlaces = false;
+    });
+  }
+
+  onClickItem(oId: string, slider: IonItemSliding) {
+    slider.close();
+    this.router.navigate(['/', 'places', 'offers', 'edit', oId]);
   }
 
   ngOnDestroy(): void {
@@ -34,5 +41,4 @@ export class OffersPage implements OnInit, OnDestroy {
       this.placesSub.unsubscribe();
     }
   }
-
 }

@@ -12,11 +12,21 @@
 
 <ion-content>
 
-  <ion-list>
+  <div class="center" *ngIf="isLoadingPlaces">
+    <ion-spinner color="primary"></ion-spinner>
+  </div>
+
+
+  <div class="center" *ngIf="!isLoadingPlaces && offers.length <= 0">
+    <ion-text> No offers found</ion-text>
+    <ion-button color="primary" fill="clear" expand="full" routerLink="/places/offers/new"> Create new offer </ion-button>
+  </div>
+
+  <ion-list *ngIf="!isLoadingPlaces && offers.length > 0">
 
     <ion-item-sliding *ngFor="let offer of offers" #slider>
-     <app-offer-item [offer]="offer"></app-offer-item>
-  
+      <app-offer-item [offer]="offer"></app-offer-item>
+
       <ion-item-options>
         <ion-item-option (click)="onClickItem(offer.id, slider)">
           <ion-icon name="pencil-sharp" slot="icon-only"></ion-icon>

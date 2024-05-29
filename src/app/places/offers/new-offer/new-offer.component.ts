@@ -62,9 +62,7 @@ export class NewOfferComponent implements OnInit {
     })
 
     var formValue = this.form.value;
-
-    console.log("creating..")
-
+    
     this.placeService.addPlace(
       formValue.title,
       formValue.description,
@@ -73,7 +71,7 @@ export class NewOfferComponent implements OnInit {
       new Date(formValue.dateFrom),
       new Date(formValue.dateTo),
       this.authService.user
-    ).subscribe(p =>{
+    ).subscribe(() =>{
       this.loadingCtrl.dismiss()
       this.router.navigate(['/', 'places', 'offers'])
 

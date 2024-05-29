@@ -49,10 +49,19 @@ export class CreateBookingComponent implements OnInit {
     if (!this.form.valid) {
       return;
     }
+    this.modalCtrl.dismiss(
+      {
+        bookData: {
+          firstName: this.form.value.firstName,
+          lastName: this.form.value.lastName,
+          guestNumber: +this.form.value.guestNumber,
+          availableFrom: new Date(this.fromDate),
+          availableTo: new Date(this.toDate)
 
-    console.log(this.form.value);
-    console.log(this.form);
-
-    this.modalCtrl.dismiss({ place: this.place, status: 'Booked!' }, 'confirm');
+        },
+        status: 'Booked!',
+      },
+      'confirm'
+    );
   }
 }

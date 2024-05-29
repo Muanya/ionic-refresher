@@ -10,3 +10,14 @@ export class Places {
     public userId: string 
   ) {}
 }
+
+
+export interface PlaceRequest {
+availableFrom: string
+availableTo: string
+description: string
+imageUrl: string
+price: number,
+title: string,
+userId: string
+}

@@ -1,52 +1,61 @@
 import { Injectable } from '@angular/core';
-import { Places } from './places.model';
-import { BehaviorSubject, Observable, delay, map, take, tap } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import {
+  BehaviorSubject,
+  Observable,
+  delay,
+  map,
+  switchMap,
+  take,
+  tap,
+} from 'rxjs';
+
+import { PlaceRequest, Places } from './places.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PlacesService {
-  private _places = new BehaviorSubject<Places[]>([
-    {
-      id: 'p1',
-      title: 'Victoria Island',
-      description: 'A beautiful city in lagos',
-      imageUrl:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQvvgbAy7SXd4n1DVASF2BGajl1l0q28qB9w8a_OPZ1w&s',
-      price: 987.99,
-      availableFrom: new Date('2024-01-01'),
-      availableTo: new Date('2024-12-01'),
-      userId: 'user1',
-    },
-    {
-      id: 'p2',
-      title: 'Romantica',
-      description: 'A place to experience the joy of romance',
-      imageUrl:
-        'https://i.pinimg.com/originals/08/84/58/088458d264f0f4dfad92442bf7e80bd4.jpg',
-      price: 98.92,
-      availableFrom: new Date('2024-01-01'),
-      availableTo: new Date('2024-12-01'),
-      userId: 'user2',
-    },
+  private _baseUrl = 'https://ionic-refresh-default-rtdb.firebaseio.com/subBnb';
+  private _placeUrl: string = `${this._baseUrl}/all-places.json`;
+  private _places = new BehaviorSubject<Places[]>([]);
 
-    {
-      id: 'p3',
-      title: 'Foggy Palace',
-      description: 'A beautiful fog surrouding a great palace',
-      imageUrl:
-        'https://www.shutterstock.com/image-photo/hohenschwangau-bavaria-germany-9th-august-260nw-1175541790.jpg',
-      price: 87.79,
-      availableFrom: new Date('2024-01-01'),
-      availableTo: new Date('2024-12-01'),
-      userId: 'user1',
-    },
-  ]);
-
-  constructor() {}
+  constructor(private httpClient: HttpClient) {}
 
   public get places(): Observable<Places[]> {
     return this._places.asObservable();
+  }
+
+  public fetchPlaces() {
+    return this.httpClient
+      .get<{ [key: string]: PlaceRequest }>(this._placeUrl)
+      .pipe(
+        take(1),
+        map((res) => {
+          const place: Places[] = [];
+
+          for (const key in res) {
+            place.push(
+              new Places(
+                key,
+                res[key].title,
+                res[key].description,
+                res[key].imageUrl,
+                res[key].price,
+                new Date(res[key].availableFrom),
+                new Date(res[key].availableTo),
+                res[key].userId
+              )
+            );
+          }
+
+          return place;
+        }),
+
+        tap((pls) => {
+          this._places.next(pls);
+        })
+      );
   }
 
   public placesById(id: string): Observable<Places> {
@@ -56,6 +65,22 @@ export class PlacesService {
         return { ...p.find((el) => el.id === id) } as Places;
       })
     );
+  }
+
+  public fetchPlacesById(id: string) {
+    const url = `${this._baseUrl}/all-places/${id}.json`;
+    return this.httpClient.get<PlaceRequest>(url).pipe( take(1), map(res => {
+      return new Places(
+        id,
+        res.title,
+        res.description,
+        res.imageUrl,
+        res.price,
+        new Date(res.availableFrom),
+        new Date(res.availableTo),
+        res.userId
+      );
+    }));
   }
 
   public deleteById(pId: string) {
@@ -78,7 +103,7 @@ export class PlacesService {
     userId: string
   ) {
     const newPlace = new Places(
-      'p' + Math.random().toString(),
+      Math.random().toString(),
       title,
       description,
       imageUrl,
@@ -87,11 +112,31 @@ export class PlacesService {
       availableTo,
       userId
     );
-    
-    return this.places.pipe(take(1), delay(2000), tap(place =>{
-      place.push(newPlace)
-      this._places.next(place)
 
-    }))
+    let generatedId: string;
+
+    return this.httpClient
+      .post<{ name: string }>(this._placeUrl, { ...newPlace, id: null })
+      .pipe(
+        switchMap((res) => {
+          generatedId = res.name;
+          return this.places;
+        }),
+        take(1),
+        delay(1000),
+        tap((place) => {
+          newPlace.id = generatedId;
+          this._places.next(place.concat(newPlace));
+        })
+      );
+  }
+
+  public updatePlace(updatedPlace: Places) {
+    const key = updatedPlace.id;
+    let updateUrl = `${this._baseUrl}/all-places/${key}.json`;
+
+    return this.httpClient.put(updateUrl, { ...updatedPlace, id: null }).pipe(switchMap(()=>{
+      return this.fetchPlaces();
+    }));
   }
 }

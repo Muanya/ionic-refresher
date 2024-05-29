@@ -40,3 +40,12 @@
 .ion-invalid.ion-touched ion-label {
     color: var( --ion-color-danger);
 }
+
+.center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+
+}
