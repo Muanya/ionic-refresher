@@ -114,7 +114,6 @@ export class EditOfferComponent implements OnInit, OnDestroy {
       .fetchPlacesById(this.paramId)
       .subscribe((pl) => {
         this.selectedPlace = pl;
-        console.log(this.selectedPlace)
         this.editable = true;
         this.initForm()
 
