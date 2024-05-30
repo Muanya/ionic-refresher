@@ -17,8 +17,10 @@ import { BookingsService } from '../../../bookings/bookings.service';
 export class PlaceDetailComponent implements OnInit, OnDestroy {
   @Input() selectedPlace!: Places;
   bookable: boolean = false;
+  hasLoadedPlace: boolean = true;
 
   private placesSub!: Subscription;
+  private paramId!: string;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -31,12 +33,27 @@ export class PlaceDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.activatedRoute.paramMap.subscribe((params) => {
-      var id = params.get('placeId') as string;
+      this.paramId = params.get('placeId') as string;
 
-      this.placesSub = this.placeServices.placesById(id).subscribe((place) => {
-        this.selectedPlace = place;
-        this.bookable = this.selectedPlace.userId !== this.authService.user
-      });
+      this.placesSub = this.placeServices
+        .placesById(this.paramId)
+        .subscribe((place) => {
+          if (Object.keys(place).length === 0) {
+            this.fetchById();
+          } else {
+            this.selectedPlace = place;
+            this.bookable = this.selectedPlace.userId !== this.authService.user;
+          }
+        });
+    });
+  }
+
+  private fetchById() {
+    this.hasLoadedPlace = false;
+    this.placeServices.fetchPlacesById(this.paramId).subscribe((pl) => {
+      this.selectedPlace = pl;
+      this.bookable = this.selectedPlace.userId !== this.authService.user;
+      this.hasLoadedPlace = true;
     });
   }
 

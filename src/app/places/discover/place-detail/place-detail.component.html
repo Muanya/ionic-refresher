@@ -5,13 +5,18 @@
 
       </ion-back-button>
     </ion-buttons>
-    <ion-title>{{ selectedPlace.title }}</ion-title>
+    <ion-title *ngIf="hasLoadedPlace">{{ selectedPlace.title }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 
 <ion-content>
-  <ion-grid>
+
+  <div class="center" *ngIf="!hasLoadedPlace">
+    <ion-spinner color="primary"></ion-spinner>
+  </div>
+
+  <ion-grid *ngIf="hasLoadedPlace">
     <ion-row>
       <ion-col>
 
