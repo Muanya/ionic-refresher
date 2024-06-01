@@ -1,9 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { LoadingController } from '@ionic/angular';
+import { Subscription } from 'rxjs';
 
 import { Bookings } from './bookings.model';
 import { BookingsService } from './bookings.service';
-import { Subscription } from 'rxjs';
-import { LoadingController } from '@ionic/angular';
 
 @Component({
   selector: 'app-bookings',
@@ -14,6 +14,8 @@ export class BookingsPage implements OnInit, OnDestroy {
   private _allBookings!: Bookings[];
   private _bookingSub!: Subscription;
   private _deleteSub!: Subscription;
+
+  public loading: boolean = false
 
   constructor(
     private bookingService: BookingsService,
@@ -43,6 +45,14 @@ export class BookingsPage implements OnInit, OnDestroy {
     });
   }
 
+  ionViewWillEnter(){
+    this.loading = true;
+    
+    this.bookingService.fetchBookings().subscribe(()=>{
+      this.loading = false;
+    })
+  }
+
   ngOnDestroy(): void {
     if (this._bookingSub) {
       this._bookingSub.unsubscribe();
@@ -52,4 +62,6 @@ export class BookingsPage implements OnInit, OnDestroy {
       this._deleteSub.unsubscribe();
     }
   }
+
+
 }

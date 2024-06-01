@@ -11,16 +11,16 @@ import {
 } from 'rxjs';
 
 import { PlaceRequest, Places } from './places.model';
+import { SharedService } from '../shared.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PlacesService {
-  private _baseUrl = 'https://ionic-refresh-default-rtdb.firebaseio.com/subBnb';
-  private _placeUrl: string = `${this._baseUrl}/all-places.json`;
+ 
   private _places = new BehaviorSubject<Places[]>([]);
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient, private shared: SharedService) {}
 
   public get places(): Observable<Places[]> {
     return this._places.asObservable();
@@ -28,7 +28,7 @@ export class PlacesService {
 
   public fetchPlaces() {
     return this.httpClient
-      .get<{ [key: string]: PlaceRequest }>(this._placeUrl)
+      .get<{ [key: string]: PlaceRequest }>(this.shared.placeUrl)
       .pipe(
         take(1),
         map((res) => {
@@ -68,7 +68,7 @@ export class PlacesService {
   }
 
   public fetchPlacesById(id: string) {
-    const url = `${this._baseUrl}/all-places/${id}.json`;
+    const url = `${this.shared.baseUrl}/all-places/${id}.json`;
     return this.httpClient.get<PlaceRequest>(url).pipe( take(1), map(res => {
       return new Places(
         id,
@@ -116,7 +116,7 @@ export class PlacesService {
     let generatedId: string;
 
     return this.httpClient
-      .post<{ name: string }>(this._placeUrl, { ...newPlace, id: null })
+      .post<{ name: string }>(this.shared.placeUrl, { ...newPlace, id: null })
       .pipe(
         switchMap((res) => {
           generatedId = res.name;
@@ -133,7 +133,7 @@ export class PlacesService {
 
   public updatePlace(updatedPlace: Places) {
     const key = updatedPlace.id;
-    let updateUrl = `${this._baseUrl}/all-places/${key}.json`;
+    let updateUrl = `${this.shared.baseUrl}/all-places/${key}.json`;
 
     return this.httpClient.put(updateUrl, { ...updatedPlace, id: null }).pipe(switchMap(()=>{
       return this.fetchPlaces();

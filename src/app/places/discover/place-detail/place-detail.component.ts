@@ -99,13 +99,14 @@ export class PlaceDetailComponent implements OnInit, OnDestroy {
         const data = returnData.data.bookData;
         this.bookingService.addBooking(
           this.authService.user,
+          this.selectedPlace.id,
           data.firstName,
           data.lastName,
           this.selectedPlace.title,
           data.guestNumber,
           data.availableFrom,
           data.availableTo
-        );
+        ).subscribe();
       });
   }
 

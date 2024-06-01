@@ -9,13 +9,15 @@ import { OffersPage } from './offers.page';
 import { EditOfferComponent } from './edit-offer/edit-offer.component';
 import { NewOfferComponent } from './new-offer/new-offer.component';
 import { OfferItemComponent } from './offer-item/offer-item.component';
+import { SharedModule } from '../../shared/shared.module';
 
 @NgModule({
   imports: [
     CommonModule,
     ReactiveFormsModule,
     IonicModule,
-    OffersPageRoutingModule
+    OffersPageRoutingModule,
+    SharedModule
   ],
   declarations: [OffersPage, EditOfferComponent, NewOfferComponent, OfferItemComponent]
 })
