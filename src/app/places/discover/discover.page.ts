@@ -1,10 +1,11 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { IonSegment, SegmentValue } from '@ionic/angular';
-import { Subscription } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 
 import { PlacesService } from '../places.service';
 import { Places } from '../places.model';
 import { AuthService } from '../../auth/auth.service';
+import { User } from '../../../app/auth/auth.model';
 
 @Component({
   selector: 'app-discover',
@@ -20,6 +21,8 @@ export class DiscoverPage implements OnInit, OnDestroy {
 
   private allPlaces: Places[] = [];
   private placesSub!: Subscription;
+  private userSub!: Subscription;
+  private user!: User;
 
   constructor(
     private authService: AuthService,
@@ -35,12 +38,20 @@ export class DiscoverPage implements OnInit, OnDestroy {
     this.segment.ionChange.subscribe((event) => {
       this.updateSegment(event.detail.value!);
     });
+
+    this.userSub = this.authService.user.pipe(take(1)).subscribe((usr) => {
+      if (usr == null) {
+        throw new Error('Not authenticated');
+      }
+
+      this.user = usr;
+    });
   }
 
   ionViewWillEnter() {
     this.isLoadingPlaces = true;
     this.placeService.fetchPlaces().subscribe(() => {
-      this.isLoadingPlaces = false
+      this.isLoadingPlaces = false;
     });
     this.updateSegment(this.segment.value!);
   }
@@ -49,6 +60,10 @@ export class DiscoverPage implements OnInit, OnDestroy {
     if (this.placesSub) {
       this.placesSub.unsubscribe();
     }
+
+    if (this.userSub) {
+      this.userSub.unsubscribe();
+    }
   }
 
   updateSegment(segmentValue: SegmentValue) {
@@ -56,7 +71,7 @@ export class DiscoverPage implements OnInit, OnDestroy {
       this.places = this.allPlaces;
     } else {
       this.places = this.allPlaces.filter((pl) => {
-        return pl.userId !== this.authService.user;
+        return pl.userId !== this.user.id;
       });
     }
   }

@@ -5,6 +5,7 @@ import { PlacesService } from '../../places.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { Router } from '@angular/router';
 import { LoadingController } from '@ionic/angular';
+import { switchMap, take } from 'rxjs';
 
 @Component({
   selector: 'app-new-offer',
@@ -55,27 +56,37 @@ export class NewOfferComponent implements OnInit {
       return;
     }
 
-    this.loadingCtrl.create({
-      message: "Creating"
-    }).then(p => {
-      p.present()
-    })
+    this.loadingCtrl
+      .create({
+        message: 'Creating',
+      })
+      .then((p) => {
+        p.present();
+      });
 
     var formValue = this.form.value;
-    
-    this.placeService.addPlace(
-      formValue.title,
-      formValue.description,
-      'https://media.timeout.com/images/105790330/image.jpg',
-      +formValue.price,
-      new Date(formValue.dateFrom),
-      new Date(formValue.dateTo),
-      this.authService.user
-    ).subscribe(() =>{
-      this.loadingCtrl.dismiss()
-      this.router.navigate(['/', 'places', 'offers'])
 
-    });
-
+    this.authService.user
+      .pipe(
+        take(1),
+        switchMap((user) => {
+          if (user == null) {
+            throw new Error('Not authenticated');
+          }
+          return this.placeService.addPlace(
+            formValue.title,
+            formValue.description,
+            'https://media.timeout.com/images/105790330/image.jpg',
+            +formValue.price,
+            new Date(formValue.dateFrom),
+            new Date(formValue.dateTo),
+            user
+          );
+        })
+      )
+      .subscribe(() => {
+        this.loadingCtrl.dismiss();
+        this.router.navigate(['/', 'places', 'offers']);
+      });
   }
 }

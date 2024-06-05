@@ -11,51 +11,60 @@ import {
 } from 'rxjs';
 
 import { PlaceRequest, Places } from './places.model';
-import { SharedService } from '../shared.service';
+import { SharedService } from '../shared/shared.service';
+import { AuthService } from '../auth/auth.service';
+import { User } from '../auth/auth.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PlacesService {
- 
   private _places = new BehaviorSubject<Places[]>([]);
 
-  constructor(private httpClient: HttpClient, private shared: SharedService) {}
+  constructor(
+    private authService: AuthService,
+    private httpClient: HttpClient,
+    private shared: SharedService
+  ) {}
 
   public get places(): Observable<Places[]> {
     return this._places.asObservable();
   }
 
   public fetchPlaces() {
-    return this.httpClient
-      .get<{ [key: string]: PlaceRequest }>(this.shared.placeUrl)
-      .pipe(
-        take(1),
-        map((res) => {
-          const place: Places[] = [];
+    return this.authService.user.pipe(
+      take(1),
+      switchMap((user) => {
+        return this.httpClient.get<{ [key: string]: PlaceRequest }>(
+          `${this.shared.placeUrl}?auth=${user?.token}`
+        );
+      }),
+      take(1),
+      map((res) => {
+        const place: Places[] = [];
 
-          for (const key in res) {
-            place.push(
-              new Places(
-                key,
-                res[key].title,
-                res[key].description,
-                res[key].imageUrl,
-                res[key].price,
-                new Date(res[key].availableFrom),
-                new Date(res[key].availableTo),
-                res[key].userId
-              )
-            );
-          }
+        for (const key in res) {
+          place.push(
+            new Places(
+              key,
+              res[key].title,
+              res[key].description,
+              res[key].imageUrl,
+              res[key].price,
+              new Date(res[key].availableFrom),
+              new Date(res[key].availableTo),
+              res[key].userId
+            )
+          );
+        }
 
-          return place;
-        }),
+        return place;
+      }),
 
-        tap((pls) => {
-          this._places.next(pls);
-        })
-      );
+      tap((pls) => {
+        this._places.next(pls);
+      })
+    );
   }
 
   public placesById(id: string): Observable<Places> {
@@ -68,19 +77,26 @@ export class PlacesService {
   }
 
   public fetchPlacesById(id: string) {
-    const url = `${this.shared.baseUrl}/all-places/${id}.json`;
-    return this.httpClient.get<PlaceRequest>(url).pipe( take(1), map(res => {
-      return new Places(
-        id,
-        res.title,
-        res.description,
-        res.imageUrl,
-        res.price,
-        new Date(res.availableFrom),
-        new Date(res.availableTo),
-        res.userId
-      );
-    }));
+    return this.authService.user.pipe(
+      take(1),
+      switchMap((user) => {
+        const url = `${this.shared.baseUrl}/all-places/${id}.json?auth=${user?.token}`;
+        return this.httpClient.get<PlaceRequest>(url);
+      }),
+      take(1),
+      map((res) => {
+        return new Places(
+          id,
+          res.title,
+          res.description,
+          res.imageUrl,
+          res.price,
+          new Date(res.availableFrom),
+          new Date(res.availableTo),
+          res.userId
+        );
+      })
+    );
   }
 
   public deleteById(pId: string) {
@@ -100,7 +116,7 @@ export class PlacesService {
     price: number,
     availableFrom: Date,
     availableTo: Date,
-    userId: string
+    user: User
   ) {
     const newPlace = new Places(
       Math.random().toString(),
@@ -110,13 +126,16 @@ export class PlacesService {
       price,
       availableFrom,
       availableTo,
-      userId
+      user.id
     );
 
     let generatedId: string;
 
     return this.httpClient
-      .post<{ name: string }>(this.shared.placeUrl, { ...newPlace, id: null })
+      .post<{ name: string }>(`${this.shared.placeUrl}?auth=${user.token}`, {
+        ...newPlace,
+        id: null,
+      })
       .pipe(
         switchMap((res) => {
           generatedId = res.name;
@@ -131,12 +150,15 @@ export class PlacesService {
       );
   }
 
-  public updatePlace(updatedPlace: Places) {
+  public updatePlace(updatedPlace: Places, token: string) {
     const key = updatedPlace.id;
-    let updateUrl = `${this.shared.baseUrl}/all-places/${key}.json`;
+    let updateUrl = `${this.shared.baseUrl}/all-places/${key}.json?auth=${token}`;
 
-    return this.httpClient.put(updateUrl, { ...updatedPlace, id: null }).pipe(switchMap(()=>{
-      return this.fetchPlaces();
-    }));
+    return this.httpClient.put(updateUrl, { ...updatedPlace, id: null }).pipe(
+      take(1),
+      switchMap(() => {
+        return this.fetchPlaces();
+      })
+    );
   }
 }

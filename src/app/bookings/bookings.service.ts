@@ -10,7 +10,7 @@ import {
 } from 'rxjs';
 
 import { BookingGetData, Bookings } from './bookings.model';
-import { SharedService } from '../shared.service';
+import { SharedService } from '../shared/shared.service';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../auth/auth.service';
 
@@ -56,27 +56,39 @@ export class BookingsService {
 
     let generatedId: string;
 
-    return this.httpClient
-      .post<{ name: string }>(this.shared.bookingUrl, {
-        ...newBooking,
-        id: null,
+    return this.authService.user.pipe(
+      take(1),
+      switchMap((user) => {
+        return this.httpClient.post<{ name: string }>(
+          `${this.shared.bookingUrl}?auth=${user?.token}`,
+          {
+            ...newBooking,
+            id: null,
+          }
+        );
+      }),
+      switchMap((res) => {
+        generatedId = res.name;
+        return this.getBookings();
+      }),
+      take(1),
+      tap((bks) => {
+        newBooking.id = generatedId;
+        this._bookings.next(bks.concat(newBooking));
       })
-      .pipe(
-        switchMap((res) => {
-          generatedId = res.name;
-          return this.getBookings();
-        }),
-        take(1),
-        tap((bks) => {
-          newBooking.id = generatedId;
-          this._bookings.next(bks.concat(newBooking));
-        })
-      );
+    );
   }
 
   public fetchBookings() {
-    const url = `${this.shared.bookingUrl}?orderBy="userId"&equalTo="${this.authService.user}"`;
-    return this.httpClient.get<{ [key: string]: BookingGetData }>(url).pipe(
+    return this.authService.user.pipe(
+      take(1),
+      switchMap((usr) => {
+        if (usr == null) {
+          throw new Error('Not Authenticated');
+        }
+        const url = `${this.shared.bookingUrl}?auth=${usr.token}&orderBy="userId"&equalTo="${usr.id}"`;
+        return this.httpClient.get<{ [key: string]: BookingGetData }>(url);
+      }),
       take(1),
       map((res) => {
         const bookings: Bookings[] = [];
@@ -114,13 +126,17 @@ export class BookingsService {
   }
 
   delete(bId: string) {
-    const url = `${this.shared.baseUrl}/all-bookings/${bId}.json`;
-    return this.httpClient.delete(url).pipe(
+    return this.authService.user.pipe(
+      take(1),
+      switchMap((user) => {
+        const url = `${this.shared.baseUrl}/all-bookings/${bId}.json?auth=${user?.token}`;
+        return this.httpClient.delete(url);
+      }),
+      take(1),
       switchMap(() => {
         return this.getBookings();
       }),
       take(1),
-      delay(2000),
       tap((bks) => {
         this._bookings.next(bks.filter((bk) => bk.id !== bId));
       })

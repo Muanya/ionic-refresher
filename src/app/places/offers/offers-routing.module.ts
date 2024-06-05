@@ -4,27 +4,21 @@ import { Routes, RouterModule } from '@angular/router';
 import { OffersPage } from './offers.page';
 import { NewOfferComponent } from './new-offer/new-offer.component';
 import { EditOfferComponent } from './edit-offer/edit-offer.component';
-import { OfferBookingsComponent } from './offer-bookings/offer-bookings.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: OffersPage
+    component: OffersPage,
   },
 
   {
     path: 'new',
-    component: NewOfferComponent
+    component: NewOfferComponent,
   },
   {
     path: 'edit/:placeId',
-    component: EditOfferComponent
+    component: EditOfferComponent,
   },
-
-  {
-    path: ':placeId',
-    component: OfferBookingsComponent
-  }
 ];
 
 @NgModule({

@@ -19,7 +19,8 @@
 
   <div class="center" *ngIf="!isLoadingPlaces && offers.length <= 0">
     <ion-text> No offers found</ion-text>
-    <ion-button color="primary" fill="clear" expand="full" routerLink="/places/offers/new"> Create new offer </ion-button>
+    <ion-button color="primary" fill="clear" expand="full" routerLink="/places/offers/new"> Create new offer
+    </ion-button>
   </div>
 
   <ion-list *ngIf="!isLoadingPlaces && offers.length > 0">

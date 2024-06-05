@@ -46,13 +46,13 @@
       <ion-row>
         <ion-col sizeSm="6" offsetSm="3">
           <div class="ion-margin-top">
-            <ion-button type="submit" color="primary" *ngIf="!isLoggingIn" expand="block" [disabled]="!authForm.valid">
+            <ion-button type="submit" color="primary" *ngIf="!isAuthenticating" expand="block" [disabled]="!authForm.valid">
               {{isLoginMode ? "Login" : "Sign up"}}
             </ion-button>
           </div>
 
           <div class="ion-margin-top">
-            <ion-button type="button" color="primary" fill="clear" *ngIf="!isLoggingIn" expand="block"
+            <ion-button type="button" color="primary" fill="clear" *ngIf="!isAuthenticating" expand="block"
               (click)="toggleAuthMode()">
               Go to {{!isLoginMode ? "Login" : "Sign up"}}
             </ion-button>

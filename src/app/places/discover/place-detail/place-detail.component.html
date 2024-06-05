@@ -12,11 +12,11 @@
 
 <ion-content>
 
-  <div class="center" *ngIf="!hasLoadedPlace">
+  <div class="center" *ngIf="isLoading">
     <ion-spinner color="primary"></ion-spinner>
   </div>
 
-  <ion-grid *ngIf="hasLoadedPlace">
+  <ion-grid *ngIf="!isLoading && hasLoadedPlace">
     <ion-row>
       <ion-col>
 
@@ -39,7 +39,7 @@
         <div class="ion-margin ion-text-center" *ngIf="bookable">
           <ion-button color="primary" (click)="onButtonClicked()">
             BOOK
-          </ion-button> 
+          </ion-button>
         </div>
 
         <div class="ion-margin ion-text-center" *ngIf="!bookable">

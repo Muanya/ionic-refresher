@@ -1,11 +1,11 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription, switchMap, take } from 'rxjs';
 
 import { PlacesService } from '../../places.service';
 import { Places } from '../../places.model';
-import { AuthService } from 'src/app/auth/auth.service';
+import { AuthService } from '../../../../app/auth/auth.service';
 
 @Component({
   selector: 'app-edit-offer',
@@ -18,7 +18,6 @@ export class EditOfferComponent implements OnInit, OnDestroy {
     title: new FormControl(null),
     description: new FormControl(null),
     price: new FormControl(null),
-
   });
   editable: boolean = true;
   private placesSub!: Subscription;
@@ -27,8 +26,7 @@ export class EditOfferComponent implements OnInit, OnDestroy {
   constructor(
     private activatedRoute: ActivatedRoute,
     private authService: AuthService,
-    private placeServices: PlacesService,
-    private router: Router
+    private placeServices: PlacesService
   ) {}
 
   ngOnInit() {
@@ -39,20 +37,16 @@ export class EditOfferComponent implements OnInit, OnDestroy {
         .subscribe((p) => {
           if (Object.keys(p).length === 0) {
             this.fetchById();
-          }else {
-            this.editable = true
+          } else {
+            this.editable = true;
             this.selectedPlace = p;
-            this.initForm()
+            this.initForm();
           }
         });
-
-
-
-    
     });
   }
 
-  private initForm(){
+  private initForm() {
     this.form = new FormGroup({
       title: new FormControl(this.selectedPlace.title, {
         updateOn: 'blur',
@@ -90,34 +84,42 @@ export class EditOfferComponent implements OnInit, OnDestroy {
 
     const dt = this.form.value;
 
-    const tmp = new Places(
-      this.selectedPlace.id,
-      dt.title,
-      dt.description,
-      this.selectedPlace.imageUrl,
-      +dt.price,
-      new Date(dt.dateFrom),
-      new Date(dt.dateTo),
-      this.authService.user
-    );
+    this.authService.user
+      .pipe(
+        take(1),
+        switchMap((usr) => {
+          if (usr == null) {
+            throw new Error('Not authenticated');
+          }
+          const tmp = new Places(
+            this.selectedPlace.id,
+            dt.title,
+            dt.description,
+            this.selectedPlace.imageUrl,
+            +dt.price,
+            new Date(dt.dateFrom),
+            new Date(dt.dateTo),
+            usr.id
+          );
 
-    this.placeServices.updatePlace(tmp).subscribe(() => {
-      // this.router.navigate(['/', 'places', 'offers'])
-      this.fetchById();
-    });
+          return this.placeServices.updatePlace(tmp, usr.token!);
+        })
+      )
+      .pipe(take(1))
+      .subscribe(() => {
+        // this.router.navigate(['/', 'places', 'offers'])
+        this.fetchById();
+      });
   }
 
   private fetchById() {
     this.editable = false;
 
-    this.placeServices
-      .fetchPlacesById(this.paramId)
-      .subscribe((pl) => {
-        this.selectedPlace = pl;
-        this.editable = true;
-        this.initForm()
-
-      });
+    this.placeServices.fetchPlacesById(this.paramId).subscribe((pl) => {
+      this.selectedPlace = pl;
+      this.editable = true;
+      this.initForm();
+    });
   }
 
   ngOnDestroy(): void {
